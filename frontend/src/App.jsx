@@ -5,7 +5,8 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css'; 
 import './App.css'; 
 
-// const API_BASE_URL = "/api"; 
+// IMPORTANT: Point this to your Cloud Run URL
+// const API_BASE_URL = "/api";
 const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
 
 // --- HELPERS ---
@@ -83,33 +84,10 @@ const Dashboard = ({ workflows, onInspectRun, onDeleteAgent, onStopSchedule, onE
                         </div>
                         
                         <div className="agent-actions">
-                            <button 
-                                className="btn-icon" 
-                                title={wf.schedule ? "Change Schedule" : "Add Schedule"}
-                                onClick={(e) => { e.stopPropagation(); onEditSchedule(wf.id); }}
-                            >
-                                ⏰
-                            </button>
-                            
-                            {wf.schedule && (
-                                <button 
-                                    className="btn-icon danger" 
-                                    title="Stop Schedule"
-                                    onClick={(e) => { e.stopPropagation(); onStopSchedule(wf.schedule.id); }}
-                                >
-                                    ⏹
-                                </button>
-                            )}
-
-                            <button 
-                                className="btn-icon danger" 
-                                title="Delete Agent"
-                                onClick={(e) => { e.stopPropagation(); onDeleteAgent(wf.id); }}
-                            >
-                                🗑
-                            </button>
+                            <button className="btn-icon" title="Schedule" onClick={(e) => { e.stopPropagation(); onEditSchedule(wf.id); }}>⏰</button>
+                            {wf.schedule && (<button className="btn-icon danger" title="Stop" onClick={(e) => { e.stopPropagation(); onStopSchedule(wf.schedule.id); }}>⏹</button>)}
+                            <button className="btn-icon danger" title="Delete" onClick={(e) => { e.stopPropagation(); onDeleteAgent(wf.id); }}>🗑</button>
                         </div>
-
                     </div>
                 ))}
             </div>
@@ -197,30 +175,13 @@ function App() {
   useEffect(() => {
     let interval;
     if (loading) {
-      // Different thoughts for different modes
       const messages = mode === "AGENT" 
-        ? [
-            "🤖 Agent is analyzing dataset schemas...",
-            "🔍 Identifying common columns (IDs, Dates)...",
-            "🧮 Detecting data types and formats...",
-            "🐍 Generative AI is writing reconciliation logic...",
-            "✅ Validating transformation code..."
-          ]
-        : [
-            "⚡️ Reading your instructions...",
-            "🧠 Analyzing input data structure...",
-            "🐍 Generating Python transformation logic...",
-            "✨ Optimizing code efficiency..."
-          ];
+        ? ["🤖 Agent is analyzing dataset schemas...", "🔍 Identifying common columns (IDs, Dates)...", "🧮 Detecting data types and formats...", "🐍 Generative AI is writing reconciliation logic...", "✅ Validating transformation code..."]
+        : ["⚡️ Reading your instructions...", "🧠 Analyzing input data structure...", "🐍 Generating Python transformation logic...", "✨ Optimizing code efficiency..."];
       
       let i = 0;
       setLoadingMessage(messages[0]);
-      
-      // Cycle through messages every 2.5 seconds
-      interval = setInterval(() => {
-        i = (i + 1) % messages.length;
-        setLoadingMessage(messages[i]);
-      }, 2500); 
+      interval = setInterval(() => { i = (i + 1) % messages.length; setLoadingMessage(messages[i]); }, 2500); 
     }
     return () => clearInterval(interval);
   }, [loading, mode]);
@@ -253,15 +214,43 @@ function App() {
         console.log("Loaded:", newDataset.name);
     } catch (e) { alert("Failed load: " + e.message); } finally { setLoading(false); }
   };
+  
+  // --- NEW: HANDLE CSV UPLOAD ---
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // --- NEW: DELETE CONTEXT HANDLER ---
-  const handleDeleteContext = (e, id) => {
-    e.stopPropagation(); // Prevent selecting row
-    setBaseDatasets(prev => prev.filter(ds => ds.id !== id));
-    // If we were viewing this dataset, close the modal
-    if (viewingDataset && viewingDataset.id === id) {
-        setViewingDataset(null);
+    const formData = new FormData();
+    formData.append("file", file);
+    setLoading(true);
+
+    try {
+      const res = await axios.post(`${API_BASE_URL}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const newDataset = { 
+        id: `dataset-${Date.now()}`, 
+        name: file.name, 
+        varName: `df_${file.name.replace(/[^a-zA-Z0-9]/g, '_')}`, 
+        data: res.data.data,
+        type: 'source' 
+      };
+
+      setBaseDatasets(prev => [...prev, newDataset]);
+      console.log("Uploaded:", newDataset.name);
+    } catch (err) {
+      alert("Upload failed: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setLoading(false);
+      e.target.value = null; // Reset input
     }
+  };
+
+  const handleDeleteContext = (e, id) => {
+    e.stopPropagation(); 
+    setBaseDatasets(prev => prev.filter(ds => ds.id !== id));
+    if (viewingDataset && viewingDataset.id === id) setViewingDataset(null);
   };
 
   const handleViewHistoryRun = async (run) => {
@@ -343,7 +332,6 @@ function App() {
             });
             if (Object.keys(payloadDatasets).length === 0) {
                  step.inputIds.forEach(id => { const base = baseDatasets.find(d => d.id === id); if (base) payloadDatasets[base.varName] = base.data; });
-                 if (Object.keys(payloadDatasets).length === 0) throw new Error(`Step ${step.numericId} missing inputs.`);
             }
             const response = await axios.post(`${API_BASE_URL}/execute_multi`, { datasets: payloadDatasets, code: step.code });
             const resultData = response.data.result;
@@ -353,7 +341,7 @@ function App() {
             await axios.post(`${API_BASE_URL}/db/save`, { table_name: tableName, data: resultData });
             await new Promise(r => setTimeout(r, 300)); 
         }
-        fetchTables(); // Refresh table list after run
+        fetchTables(); 
         alert(`✅ Complete! Saved as 'final_${runId}'`);
     } catch (e) { alert(`❌ Failed: ${e.response?.data?.detail || e.message}`); } finally { setLoading(false); setCurrentRunningStep(null); }
   };
@@ -361,31 +349,12 @@ function App() {
   const handleReset = () => { if(steps.length > 0 && !window.confirm("Clear unsaved progress?")) return; setBaseDatasets([]); setSteps([]); setPrompt(""); setSelectedInputIds([]); setEditingStepId(null); setSelectedWorkflowId(""); setMode("AI"); setHistoricalRunId(null); };
   const handleSelectWorkflow = (id) => { setSelectedWorkflowId(id); if (!id) return; const wf = savedWorkflows.find(w => w.id === id); if (wf) { const cleanSteps = wf.steps.map(s => ({ ...s, data: [] })); setSteps(cleanSteps); setEditingStepId(null); } };
   
-  // --- HANDLERS ---
   const handleDeleteAgent = async (id) => { 
-      if (!window.confirm("Are you sure you want to delete this agent? This cannot be undone.")) return;
-      try { 
-          await axios.delete(`${API_BASE_URL}/workflows/${id}`); 
-          alert("Agent Deleted."); 
-          if(selectedWorkflowId === id) { setSelectedWorkflowId(""); handleReset(); }
-          fetchWorkflows(); 
-      } catch (e) { alert("Failed to delete agent."); } 
+      if (!window.confirm("Delete agent?")) return;
+      try { await axios.delete(`${API_BASE_URL}/workflows/${id}`); alert("Deleted."); if(selectedWorkflowId === id) { setSelectedWorkflowId(""); handleReset(); } fetchWorkflows(); } catch (e) { alert("Failed."); } 
   };
-
-  const handleStopSchedule = async (scheduleId) => {
-      if (!window.confirm("Stop the active schedule?")) return;
-      try {
-          await axios.delete(`${API_BASE_URL}/schedules/${scheduleId}`);
-          alert("Schedule Stopped.");
-          fetchWorkflows(); 
-      } catch(e) { alert("Failed to stop schedule: " + e.message); }
-  };
-
-  const handleEditSchedule = (id) => {
-      setSelectedWorkflowId(id);
-      setShowScheduler(true);
-  };
-
+  const handleStopSchedule = async (scheduleId) => { if (!window.confirm("Stop schedule?")) return; try { await axios.delete(`${API_BASE_URL}/schedules/${scheduleId}`); alert("Stopped."); fetchWorkflows(); } catch(e) { alert("Failed: " + e.message); } };
+  const handleEditSchedule = (id) => { setSelectedWorkflowId(id); setShowScheduler(true); };
   const saveWorkflow = async () => { const name = window.prompt("Name:", `Process ${new Date().toLocaleDateString()}`); if (!name) return; try { await axios.post(`${API_BASE_URL}/workflows`, { name, steps }); alert("Saved!"); fetchWorkflows(); } catch (e) { alert("Fail"); } };
   const handleEdit = (step) => { setEditingStepId(step.id); if (step.prompt.startsWith("🤖")) { setMode("AGENT"); setPrompt(step.prompt.replace(/🤖.*?: /, "")); } else { setMode("AI"); setPrompt(step.prompt); } setSelectedInputIds(step.inputIds || []); document.getElementById("control-panel").scrollIntoView({ behavior: 'smooth' }); };
   const handleCancelEdit = () => { setEditingStepId(null); setPrompt(""); setSelectedInputIds([]); };
@@ -409,8 +378,6 @@ function App() {
 
   return (
     <div className="app-root">
-      
-      {/* HEADER */}
       <div className="header">
           <div className="header-left">
               <h1 className="header-title"><span style={{color:'#2563eb'}}>⚡️</span> AutoFlow</h1>
@@ -422,16 +389,10 @@ function App() {
           {activeView === 'BUILDER' && <button onClick={handleReset} className="btn btn-secondary btn-sm">+ New Project</button>}
       </div>
 
-      {/* FIXED: SCHEDULER MODAL MOVED HERE (Available in ALL views) */}
       {showScheduler && selectedWorkflowId && (
-          <SchedulerModal 
-            workflowId={selectedWorkflowId} 
-            workflowName={savedWorkflows.find(w => w.id === selectedWorkflowId)?.name} 
-            onClose={() => setShowScheduler(false)} 
-          />
+          <SchedulerModal workflowId={selectedWorkflowId} workflowName={savedWorkflows.find(w => w.id === selectedWorkflowId)?.name} onClose={() => setShowScheduler(false)} />
       )}
 
-      {/* MODAL */}
       {viewingDataset && (
           <div className="modal-overlay">
               <div className="modal-content">
@@ -441,24 +402,13 @@ function App() {
           </div>
       )}
 
-      {/* DASHBOARD VIEW */}
       {activeView === 'DASHBOARD' && (
-          <Dashboard 
-              workflows={savedWorkflows} 
-              onInspectRun={handleViewHistoryRun} 
-              onDeleteAgent={handleDeleteAgent}
-              onStopSchedule={handleStopSchedule}
-              onEditSchedule={handleEditSchedule}
-          />
+          <Dashboard workflows={savedWorkflows} onInspectRun={handleViewHistoryRun} onDeleteAgent={handleDeleteAgent} onStopSchedule={handleStopSchedule} onEditSchedule={handleEditSchedule} />
       )}
 
-      {/* BUILDER VIEW */}
       {activeView === 'BUILDER' && (
           <div className="builder-layout">
-            
             <div className="control-pane">
-                
-                {/* HISTORY BANNER */}
                 {historicalRunId && (
                     <div style={{background:'#fff7ed', border:'1px solid #fdba74', color:'#c2410c', padding:'12px', borderRadius:'8px', fontSize:'0.9rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                         <span>🕰️ <strong>Historical View:</strong> Run {historicalRunId}</span>
@@ -466,14 +416,9 @@ function App() {
                     </div>
                 )}
 
-                {/* TOOLBAR */}
                 <div className="toolbar">
                     <div className="toolbar-group">
-                        <select 
-                            value={selectedWorkflowId} 
-                            onChange={(e) => handleSelectWorkflow(e.target.value)} 
-                            className="select-dark"
-                        >
+                        <select value={selectedWorkflowId} onChange={(e) => handleSelectWorkflow(e.target.value)} className="select-dark">
                             <option value="">-- Load Saved Agents --</option>
                             {savedWorkflows.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                         </select>
@@ -487,58 +432,48 @@ function App() {
                 {/* SECTION 1 DATA CONTEXT */}
                 <div className="panel">
                     <label className="label">1. Data Context</label>
-                    <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
-                        <select 
-                          className="input-field" 
-                          style={{marginBottom:0}} 
-                          value={selectedTable} 
-                          onChange={(e) => setSelectedTable(e.target.value)}
-                        >
+                    <div style={{display:'flex', gap:'10px', marginBottom:'10px', flexWrap:'wrap'}}>
+                        <select className="input-field" style={{marginBottom:0, width:'auto', flexGrow:1}} value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
                             <option value="">-- Select Source Table --</option>
-                            {availableTables
-                                .filter(t => !t.startsWith("temp_") && !t.startsWith("final_") && !t.startsWith("run_"))
-                                .map(t => <option key={t} value={t}>{t}</option>)
-                            }
+                            {availableTables.filter(t => !t.startsWith("temp_") && !t.startsWith("final_") && !t.startsWith("run_")).map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
-                        <button onClick={handleLoadTable} disabled={loading || !selectedTable} className="btn btn-primary btn-sm" style={{width:'auto'}}>Load</button>
+                        <button onClick={handleLoadTable} disabled={loading || !selectedTable} className="btn btn-primary btn-sm" style={{width:'auto'}}>Load DB</button>
+                        
+                        {/* NEW: Upload Button */}
+                        <div style={{position: 'relative', overflow: 'hidden', display: 'inline-block'}}>
+                            <button className="btn btn-secondary btn-sm" style={{height: '100%'}}>📂 Upload CSV</button>
+                            <input 
+                                type="file" 
+                                accept=".csv"
+                                onChange={handleFileUpload}
+                                style={{
+                                    position: 'absolute', 
+                                    left: 0, 
+                                    top: 0, 
+                                    opacity: 0, 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    cursor: 'pointer'
+                                }} 
+                            />
+                        </div>
+
                     </div>
                     
                     <div className="dataset-list">
                         {baseDatasets.length === 0 && <div style={{fontStyle:'italic', color:'#94a3b8', fontSize:'0.85rem'}}>No source datasets loaded.</div>}
                         {baseDatasets.map(ds => (
-                          <div 
-                            key={ds.id} 
-                            className={`dataset-item ${highlightedContextId === ds.id ? 'selected' : ''}`}
-                            onClick={() => handleContextSelect(ds.id)}
-                          >
-                            <div className="dataset-name">
-                              <span className="file-icon">📄</span>
-                              <span>{ds.name}</span>
-                            </div>
-                            
-                            {/* ACTIONS: View + Delete */}
+                          <div key={ds.id} className={`dataset-item ${highlightedContextId === ds.id ? 'selected' : ''}`} onClick={() => handleContextSelect(ds.id)}>
+                            <div className="dataset-name"><span className="file-icon">📄</span><span>{ds.name}</span></div>
                             <div className="dataset-actions">
-                                <button 
-                                    className="btn-view" 
-                                    onClick={(e) => handleContextView(e, ds)}
-                                >
-                                    View
-                                </button>
-                                <button 
-                                    className="btn-delete-context" 
-                                    onClick={(e) => handleDeleteContext(e, ds.id)}
-                                    title="Remove from Context"
-                                >
-                                    🗑
-                                </button>
+                                <button className="btn-view" onClick={(e) => handleContextView(e, ds)}>View</button>
+                                <button className="btn-delete-context" onClick={(e) => handleDeleteContext(e, ds.id)} title="Remove">🗑</button>
                             </div>
-
                           </div>
                         ))}
                     </div>
                 </div>
 
-                {/* LOGIC ENGINE (Updated with Simulated Thoughts) */}
                 {!historicalRunId && (
                     <div id="control-panel" className={`panel ${editingStepId ? 'editing' : ''}`}>
                         <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px'}}>
@@ -547,12 +482,7 @@ function App() {
                         </div>
 
                         {loading && !currentRunningStep ? (
-                           <div className="processing-view">
-                              <div className="spinner"></div>
-                              <div className="processing-text">
-                                {loadingMessage}
-                              </div>
-                           </div>
+                           <div className="processing-view"><div className="spinner"></div><div className="processing-text">{loadingMessage}</div></div>
                         ) : (
                            <>
                               <div className="inner-tabs"><div className={`inner-tab ${mode === "AI" ? "active" : ""}`} onClick={() => setMode("AI")}>Natural Language</div><div className={`inner-tab ${mode === "AGENT" ? "active" : ""}`} onClick={() => setMode("AGENT")}>Smart Modules</div></div>
@@ -573,7 +503,6 @@ function App() {
                     </div>
                 )}
 
-                {/* OUTPUT STAGES */}
                 {steps.map((step) => (
                     <div key={step.id} className="step-card">
                         <div className="step-header"><span>STAGE {step.numericId}</span>{!historicalRunId && <div><button onClick={() => downloadCSV(step)} className="btn btn-outline btn-sm" style={{marginRight:'5px'}}>Export</button><button onClick={() => handleEdit(step)} className="btn btn-outline btn-sm">Config</button></div>}</div>

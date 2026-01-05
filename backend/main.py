@@ -5,13 +5,12 @@ import uuid
 import pandas as pd
 import datetime
 import google.generativeai as genai
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 # --- SQLALCHEMY ---
-# Added 'text' to imports for dropping tables
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, Integer, Text, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -23,13 +22,15 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 # --- CONFIGURATION ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+if not GEMINI_API_KEY:
+    print("🚨 CRITICAL ERROR: GEMINI_API_KEY is missing from environment variables!")
 else:
-    print("⚠️ Error: GEMINI_API_KEY is missing!")
+    genai.configure(api_key=GEMINI_API_KEY)
 
-# FIXED: Changed invalid 'gemini-3' to 'gemini-1.5-flash'
-model = genai.GenerativeModel('gemini-3-pro-preview')
+try:
+    model = genai.GenerativeModel('gemini-3-pro-preview')
+except Exception as e:
+    print(f"⚠️ Model Warning: {e}")
 
 app = FastAPI()
 
@@ -81,33 +82,30 @@ def get_db():
 def seed_dummy_data():
     """Forces a refresh of the warehouse data to fix schema mismatches."""
     print("🌱 Checking Data Warehouse...")
-    
-    # We use a connection to explicitly drop tables to ensure schema updates
-    with data_engine.connect() as conn:
-        # FIXED: Drop old tables so new schema (txn_id) takes effect
-        conn.execute(text("DROP TABLE IF EXISTS gl_transactions"))
-        conn.execute(text("DROP TABLE IF EXISTS bank_statement"))
-        
-        # Table 1: GL Transactions
-        df_gl = pd.DataFrame({
-            "txn_id": [f"GL-{i}" for i in range(1001, 1021)],
-            "date": pd.date_range(start="2024-01-01", periods=20),
-            "amount": [100.50, 200.00, -50.00, 1200.00, 45.00] * 4,
-            "description": ["Service Fee", "Consulting", "Refund", "Retainer", "Supplies"] * 4
-        })
-        df_gl.to_sql("gl_transactions", data_engine, index=False)
+    try:
+        with data_engine.connect() as conn:
+            conn.execute(text("DROP TABLE IF EXISTS gl_transactions"))
+            conn.execute(text("DROP TABLE IF EXISTS bank_statement"))
+            
+            df_gl = pd.DataFrame({
+                "txn_id": [f"GL-{i}" for i in range(1001, 1021)],
+                "date": pd.date_range(start="2024-01-01", periods=20),
+                "amount": [100.50, 200.00, -50.00, 1200.00, 45.00] * 4,
+                "description": ["Service Fee", "Consulting", "Refund", "Retainer", "Supplies"] * 4
+            })
+            df_gl.to_sql("gl_transactions", data_engine, index=False)
 
-        # Table 2: Bank Statement
-        df_bank = pd.DataFrame({
-            "txn_id": [f"GL-{i}" for i in range(1001, 1018)], 
-            "date": pd.date_range(start="2024-01-01", periods=17),
-            "amount": [100.50, 200.00, -50.00, 1200.00, 45.00] * 3 + [100.50, 200.00],
-            "bank_ref": ["REF-A", "REF-B", "REF-C", "REF-D", "REF-E"] * 3 + ["REF-F", "REF-G"]
-        })
-        df_bank.to_sql("bank_statement", data_engine, index=False)
-        print("✅ Data Warehouse Seeded (Tables Recreated).")
+            df_bank = pd.DataFrame({
+                "txn_id": [f"GL-{i}" for i in range(1001, 1018)], 
+                "date": pd.date_range(start="2024-01-01", periods=17),
+                "amount": [100.50, 200.00, -50.00, 1200.00, 45.00] * 3 + [100.50, 200.00],
+                "bank_ref": ["REF-A", "REF-B", "REF-C", "REF-D", "REF-E"] * 3 + ["REF-F", "REF-G"]
+            })
+            df_bank.to_sql("bank_statement", data_engine, index=False)
+            print("✅ Data Warehouse Seeded.")
+    except Exception as e:
+        print(f"⚠️ Seeding skipped or failed: {e}")
 
-# Run seeding on startup
 seed_dummy_data()
 
 # ==========================================
@@ -132,7 +130,6 @@ def execute_workflow_server_side(workflow_id: str):
         workflow = db.query(WorkflowDB).filter(WorkflowDB.id == workflow_id).first()
         if not workflow: raise Exception("Workflow not found")
 
-        # Context Setup
         context_datasets = {}
         insp = inspect(data_engine)
         for table in insp.get_table_names():
@@ -142,7 +139,6 @@ def execute_workflow_server_side(workflow_id: str):
                     context_datasets[f"df_{table}"] = df
                 except: pass
 
-        # Execution
         final_table_name = None
         for i, step in enumerate(workflow.steps):
             local_vars = {**context_datasets, 'pd': pd}
@@ -272,6 +268,18 @@ def run_python_logic(datasets_map: Dict[str, pd.DataFrame], prompt: str = None, 
     
     return { "result": result_df.to_dict(orient="records"), "code": executable_code }
 
+# --- NEW: UPLOAD ENDPOINT ---
+@app.post("/upload")
+async def upload_csv(file: UploadFile = File(...)):
+    """Accepts a CSV file, reads it, and returns the data."""
+    try:
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+        df = df.fillna("NaN") # Handle NaNs for JSON
+        return {"filename": file.filename, "data": df.to_dict(orient="records")}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process CSV: {str(e)}")
+
 @app.get("/db/tables")
 async def list_tables():
     insp = inspect(data_engine)
@@ -337,9 +345,7 @@ async def delete_workflow(workflow_id: str, db: Session = Depends(get_db)):
         if job.args and job.args[0] == workflow_id:
             try:
                 scheduler.remove_job(job.id)
-                print(f"🧹 Removed orphan schedule for workflow {workflow_id}")
-            except Exception as e:
-                print(f"⚠️ Error removing schedule: {e}")
+            except Exception as e: pass
 
     db.delete(workflow)
     db.commit()
