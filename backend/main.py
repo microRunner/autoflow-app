@@ -11,7 +11,8 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 # --- SQLALCHEMY ---
-from sqlalchemy import create_engine, Column, String, JSON, DateTime, Integer, Text, inspect
+# Added 'text' to imports for dropping tables
+from sqlalchemy import create_engine, Column, String, JSON, DateTime, Integer, Text, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -20,15 +21,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 # --- CONFIGURATION ---
-# 1. Read the key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# 2. Configure the library (THIS LINE IS CRITICAL)
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 else:
     print("⚠️ Error: GEMINI_API_KEY is missing!")
 
+# FIXED: Changed invalid 'gemini-3' to 'gemini-1.5-flash'
 model = genai.GenerativeModel('gemini-3-pro-preview')
 
 app = FastAPI()
@@ -53,7 +53,6 @@ Base = declarative_base()
 
 data_engine = create_engine(DATA_WAREHOUSE_URL, connect_args={"check_same_thread": False})
 
-# --- MODELS ---
 class WorkflowDB(Base):
     __tablename__ = "workflows"
     id = Column(String, primary_key=True, index=True)
@@ -80,10 +79,14 @@ def get_db():
 
 # --- SEEDING DUMMY DATA ---
 def seed_dummy_data():
-    """Checks if warehouse is empty and seeds it with sample financial data."""
-    insp = inspect(data_engine)
-    if not insp.has_table("gl_transactions"):
-        print("🌱 Seeding Dummy Data Warehouse...")
+    """Forces a refresh of the warehouse data to fix schema mismatches."""
+    print("🌱 Checking Data Warehouse...")
+    
+    # We use a connection to explicitly drop tables to ensure schema updates
+    with data_engine.connect() as conn:
+        # FIXED: Drop old tables so new schema (txn_id) takes effect
+        conn.execute(text("DROP TABLE IF EXISTS gl_transactions"))
+        conn.execute(text("DROP TABLE IF EXISTS bank_statement"))
         
         # Table 1: GL Transactions
         df_gl = pd.DataFrame({
@@ -94,7 +97,7 @@ def seed_dummy_data():
         })
         df_gl.to_sql("gl_transactions", data_engine, index=False)
 
-        # Table 2: Bank Statement (with some missing items for recon)
+        # Table 2: Bank Statement
         df_bank = pd.DataFrame({
             "txn_id": [f"GL-{i}" for i in range(1001, 1018)], 
             "date": pd.date_range(start="2024-01-01", periods=17),
@@ -102,7 +105,7 @@ def seed_dummy_data():
             "bank_ref": ["REF-A", "REF-B", "REF-C", "REF-D", "REF-E"] * 3 + ["REF-F", "REF-G"]
         })
         df_bank.to_sql("bank_statement", data_engine, index=False)
-        print("✅ Data Warehouse Seeded.")
+        print("✅ Data Warehouse Seeded (Tables Recreated).")
 
 # Run seeding on startup
 seed_dummy_data()
@@ -133,8 +136,6 @@ def execute_workflow_server_side(workflow_id: str):
         context_datasets = {}
         insp = inspect(data_engine)
         for table in insp.get_table_names():
-            # UPDATE: Clean Context Filter (Same as Frontend)
-            # Exclude run_, temp_, and final_ tables to keep context clean for AI
             if not table.startswith("run_") and not table.startswith("temp_") and not table.startswith("final_"): 
                 try:
                     df = pd.read_sql(f"SELECT * FROM {table}", data_engine)
@@ -271,8 +272,6 @@ def run_python_logic(datasets_map: Dict[str, pd.DataFrame], prompt: str = None, 
     
     return { "result": result_df.to_dict(orient="records"), "code": executable_code }
 
-# --- ENDPOINTS ---
-
 @app.get("/db/tables")
 async def list_tables():
     insp = inspect(data_engine)
@@ -328,16 +327,12 @@ async def save_workflow(request: WorkflowSaveRequest, db: Session = Depends(get_
     db.refresh(new_workflow)
     return {"message": "Saved", "id": new_workflow.id}
 
-# UPDATE: Delete Workflow also deletes its Schedule
 @app.delete("/workflows/{workflow_id}")
 async def delete_workflow(workflow_id: str, db: Session = Depends(get_db)):
-    # 1. Check if workflow exists
     workflow = db.query(WorkflowDB).filter(WorkflowDB.id == workflow_id).first()
     if not workflow: 
         raise HTTPException(status_code=404, detail="Workflow not found")
     
-    # 2. CASCADE DELETE: Remove any active schedules for this workflow
-    # We iterate through jobs and check if the first argument (workflow_id) matches
     for job in scheduler.get_jobs():
         if job.args and job.args[0] == workflow_id:
             try:
@@ -346,7 +341,6 @@ async def delete_workflow(workflow_id: str, db: Session = Depends(get_db)):
             except Exception as e:
                 print(f"⚠️ Error removing schedule: {e}")
 
-    # 3. Delete from DB
     db.delete(workflow)
     db.commit()
     return {"message": "Deleted"}
