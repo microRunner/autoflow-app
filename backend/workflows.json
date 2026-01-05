@@ -1,0 +1,1630 @@
+[
+    {
+        "id": "94d97885",
+        "name": "Country and cities",
+        "steps": [
+            {
+                "id": 1,
+                "source": "Original Upload",
+                "sourceId": "upload",
+                "prompt": "Group by country and sum population",
+                "code": "df_result = df.groupby('Country')['Population'].sum().reset_index()",
+                "data": [
+                    {
+                        "Country": "Australia",
+                        "Population": 18406463
+                    },
+                    {
+                        "Country": "Brazil",
+                        "Population": 37580834
+                    },
+                    {
+                        "Country": "Canada",
+                        "Population": 10830382
+                    },
+                    {
+                        "Country": "China",
+                        "Population": 163439307
+                    },
+                    {
+                        "Country": "France",
+                        "Population": 5688048
+                    },
+                    {
+                        "Country": "Germany",
+                        "Population": 11809156
+                    },
+                    {
+                        "Country": "India",
+                        "Population": 64273622
+                    },
+                    {
+                        "Country": "Japan",
+                        "Population": 31930000
+                    },
+                    {
+                        "Country": "UK",
+                        "Population": 14299661
+                    },
+                    {
+                        "Country": "USA",
+                        "Population": 26045528
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "source": "Original Upload",
+                "sourceId": "upload",
+                "prompt": "Group by citry and sum population",
+                "code": "df_result = df.groupby('City')['Population'].sum()",
+                "data": [
+                    {
+                        "City": "Adelaide",
+                        "Population": 1359000
+                    },
+                    {
+                        "City": "Ahmedabad",
+                        "Population": 5577940
+                    },
+                    {
+                        "City": "Bangalore",
+                        "Population": 8443675
+                    },
+                    {
+                        "City": "Beijing",
+                        "Population": 21516000
+                    },
+                    {
+                        "City": "Belfast",
+                        "Population": 343542
+                    },
+                    {
+                        "City": "Belo Horizonte",
+                        "Population": 2521564
+                    },
+                    {
+                        "City": "Berlin",
+                        "Population": 3645000
+                    },
+                    {
+                        "City": "Birmingham",
+                        "Population": 1141816
+                    },
+                    {
+                        "City": "Bordeaux",
+                        "Population": 249712
+                    },
+                    {
+                        "City": "Brasilia",
+                        "Population": 3055149
+                    },
+                    {
+                        "City": "Brisbane",
+                        "Population": 2514000
+                    },
+                    {
+                        "City": "Bristol",
+                        "Population": 467099
+                    },
+                    {
+                        "City": "Calgary",
+                        "Population": 1336000
+                    },
+                    {
+                        "City": "Canberra",
+                        "Population": 426704
+                    },
+                    {
+                        "City": "Chengdu",
+                        "Population": 16330000
+                    },
+                    {
+                        "City": "Chennai",
+                        "Population": 4646732
+                    },
+                    {
+                        "City": "Chicago",
+                        "Population": 2716000
+                    },
+                    {
+                        "City": "Chongqing",
+                        "Population": 30484300
+                    },
+                    {
+                        "City": "Cologne",
+                        "Population": 1086000
+                    },
+                    {
+                        "City": "Curitiba",
+                        "Population": 1948626
+                    },
+                    {
+                        "City": "Dallas",
+                        "Population": 1343573
+                    },
+                    {
+                        "City": "Delhi",
+                        "Population": 11034555
+                    },
+                    {
+                        "City": "Dongguan",
+                        "Population": 8220207
+                    },
+                    {
+                        "City": "Dortmund",
+                        "Population": 587010
+                    },
+                    {
+                        "City": "Dusseldorf",
+                        "Population": 619294
+                    },
+                    {
+                        "City": "Edmonton",
+                        "Population": 1010000
+                    },
+                    {
+                        "City": "Essen",
+                        "Population": 583109
+                    },
+                    {
+                        "City": "Fortaleza",
+                        "Population": 2686612
+                    },
+                    {
+                        "City": "Frankfurt",
+                        "Population": 753056
+                    },
+                    {
+                        "City": "Fukuoka",
+                        "Population": 1538000
+                    },
+                    {
+                        "City": "Glasgow",
+                        "Population": 633120
+                    },
+                    {
+                        "City": "Goiania",
+                        "Population": 1536097
+                    },
+                    {
+                        "City": "Gold Coast",
+                        "Population": 679127
+                    },
+                    {
+                        "City": "Guangzhou",
+                        "Population": 14904400
+                    },
+                    {
+                        "City": "Hamburg",
+                        "Population": 1841000
+                    },
+                    {
+                        "City": "Hamilton",
+                        "Population": 579200
+                    },
+                    {
+                        "City": "Houston",
+                        "Population": 2328000
+                    },
+                    {
+                        "City": "Hyderabad",
+                        "Population": 6993235
+                    },
+                    {
+                        "City": "Jaipur",
+                        "Population": 3046163
+                    },
+                    {
+                        "City": "Kawasaki",
+                        "Population": 1504000
+                    },
+                    {
+                        "City": "Kitchener",
+                        "Population": 233222
+                    },
+                    {
+                        "City": "Kobe",
+                        "Population": 1525000
+                    },
+                    {
+                        "City": "Kolkata",
+                        "Population": 4496694
+                    },
+                    {
+                        "City": "Kyoto",
+                        "Population": 1475000
+                    },
+                    {
+                        "City": "Leeds",
+                        "Population": 793139
+                    },
+                    {
+                        "City": "Leipzig",
+                        "Population": 587857
+                    },
+                    {
+                        "City": "Lille",
+                        "Population": 232741
+                    },
+                    {
+                        "City": "Liverpool",
+                        "Population": 498042
+                    },
+                    {
+                        "City": "Logan City",
+                        "Population": 326615
+                    },
+                    {
+                        "City": "London",
+                        "Population": 8982000
+                    },
+                    {
+                        "City": "Los Angeles",
+                        "Population": 3980400
+                    },
+                    {
+                        "City": "Lyon",
+                        "Population": 513275
+                    },
+                    {
+                        "City": "Manaus",
+                        "Population": 2219580
+                    },
+                    {
+                        "City": "Manchester",
+                        "Population": 553230
+                    },
+                    {
+                        "City": "Marseille",
+                        "Population": 861635
+                    },
+                    {
+                        "City": "Melbourne",
+                        "Population": 5078000
+                    },
+                    {
+                        "City": "Montpellier",
+                        "Population": 277639
+                    },
+                    {
+                        "City": "Montreal",
+                        "Population": 1780000
+                    },
+                    {
+                        "City": "Mumbai",
+                        "Population": 12442373
+                    },
+                    {
+                        "City": "Munich",
+                        "Population": 1472000
+                    },
+                    {
+                        "City": "Nagoya",
+                        "Population": 2296000
+                    },
+                    {
+                        "City": "Nanjing",
+                        "Population": 8500000
+                    },
+                    {
+                        "City": "Nantes",
+                        "Population": 309346
+                    },
+                    {
+                        "City": "New York",
+                        "Population": 8419600
+                    },
+                    {
+                        "City": "Newcastle",
+                        "Population": 625098
+                    },
+                    {
+                        "City": "Nice",
+                        "Population": 342522
+                    },
+                    {
+                        "City": "Osaka",
+                        "Population": 2691000
+                    },
+                    {
+                        "City": "Ottawa",
+                        "Population": 994837
+                    },
+                    {
+                        "City": "Paris",
+                        "Population": 2148271
+                    },
+                    {
+                        "City": "Perth",
+                        "Population": 2086000
+                    },
+                    {
+                        "City": "Philadelphia",
+                        "Population": 1584064
+                    },
+                    {
+                        "City": "Phoenix",
+                        "Population": 1680992
+                    },
+                    {
+                        "City": "Pune",
+                        "Population": 3124458
+                    },
+                    {
+                        "City": "Quebec City",
+                        "Population": 542298
+                    },
+                    {
+                        "City": "Recife",
+                        "Population": 1653461
+                    },
+                    {
+                        "City": "Rio de Janeiro",
+                        "Population": 6747815
+                    },
+                    {
+                        "City": "Saitama",
+                        "Population": 1264000
+                    },
+                    {
+                        "City": "Salvador",
+                        "Population": 2886698
+                    },
+                    {
+                        "City": "San Antonio",
+                        "Population": 1547253
+                    },
+                    {
+                        "City": "San Diego",
+                        "Population": 1423851
+                    },
+                    {
+                        "City": "San Jose",
+                        "Population": 1021795
+                    },
+                    {
+                        "City": "Sao Paulo",
+                        "Population": 12325232
+                    },
+                    {
+                        "City": "Sapporo",
+                        "Population": 1952000
+                    },
+                    {
+                        "City": "Shanghai",
+                        "Population": 24256800
+                    },
+                    {
+                        "City": "Sheffield",
+                        "Population": 584853
+                    },
+                    {
+                        "City": "Shenzhen",
+                        "Population": 12528300
+                    },
+                    {
+                        "City": "Strasbourg",
+                        "Population": 280966
+                    },
+                    {
+                        "City": "Stuttgart",
+                        "Population": 634830
+                    },
+                    {
+                        "City": "Surat",
+                        "Population": 4467797
+                    },
+                    {
+                        "City": "Sydney",
+                        "Population": 5312000
+                    },
+                    {
+                        "City": "Tianjin",
+                        "Population": 15618300
+                    },
+                    {
+                        "City": "Tokyo",
+                        "Population": 13960000
+                    },
+                    {
+                        "City": "Toronto",
+                        "Population": 2930000
+                    },
+                    {
+                        "City": "Toulouse",
+                        "Population": 471941
+                    },
+                    {
+                        "City": "Vancouver",
+                        "Population": 675218
+                    },
+                    {
+                        "City": "Winnipeg",
+                        "Population": 749607
+                    },
+                    {
+                        "City": "Wollongong",
+                        "Population": 302739
+                    },
+                    {
+                        "City": "Wuhan",
+                        "Population": 11081000
+                    },
+                    {
+                        "City": "Yokohama",
+                        "Population": 3725000
+                    }
+                ]
+            }
+        ],
+        "timestamp": "2025-12-30T11:21:55.055039"
+    },
+    {
+        "id": "904dffe7",
+        "name": "Analysis 12/30/2025",
+        "steps": [
+            {
+                "id": 1,
+                "source": "Original Upload",
+                "sourceId": "upload",
+                "prompt": "griup by cities and sum population",
+                "code": "df_result = df.groupby('City', as_index=False)['Population'].sum()",
+                "data": [
+                    {
+                        "City": "Adelaide",
+                        "Population": 1359000
+                    },
+                    {
+                        "City": "Ahmedabad",
+                        "Population": 5577940
+                    },
+                    {
+                        "City": "Bangalore",
+                        "Population": 8443675
+                    },
+                    {
+                        "City": "Beijing",
+                        "Population": 21516000
+                    },
+                    {
+                        "City": "Belfast",
+                        "Population": 343542
+                    },
+                    {
+                        "City": "Belo Horizonte",
+                        "Population": 2521564
+                    },
+                    {
+                        "City": "Berlin",
+                        "Population": 3645000
+                    },
+                    {
+                        "City": "Birmingham",
+                        "Population": 1141816
+                    },
+                    {
+                        "City": "Bordeaux",
+                        "Population": 249712
+                    },
+                    {
+                        "City": "Brasilia",
+                        "Population": 3055149
+                    },
+                    {
+                        "City": "Brisbane",
+                        "Population": 2514000
+                    },
+                    {
+                        "City": "Bristol",
+                        "Population": 467099
+                    },
+                    {
+                        "City": "Calgary",
+                        "Population": 1336000
+                    },
+                    {
+                        "City": "Canberra",
+                        "Population": 426704
+                    },
+                    {
+                        "City": "Chengdu",
+                        "Population": 16330000
+                    },
+                    {
+                        "City": "Chennai",
+                        "Population": 4646732
+                    },
+                    {
+                        "City": "Chicago",
+                        "Population": 2716000
+                    },
+                    {
+                        "City": "Chongqing",
+                        "Population": 30484300
+                    },
+                    {
+                        "City": "Cologne",
+                        "Population": 1086000
+                    },
+                    {
+                        "City": "Curitiba",
+                        "Population": 1948626
+                    },
+                    {
+                        "City": "Dallas",
+                        "Population": 1343573
+                    },
+                    {
+                        "City": "Delhi",
+                        "Population": 11034555
+                    },
+                    {
+                        "City": "Dongguan",
+                        "Population": 8220207
+                    },
+                    {
+                        "City": "Dortmund",
+                        "Population": 587010
+                    },
+                    {
+                        "City": "Dusseldorf",
+                        "Population": 619294
+                    },
+                    {
+                        "City": "Edmonton",
+                        "Population": 1010000
+                    },
+                    {
+                        "City": "Essen",
+                        "Population": 583109
+                    },
+                    {
+                        "City": "Fortaleza",
+                        "Population": 2686612
+                    },
+                    {
+                        "City": "Frankfurt",
+                        "Population": 753056
+                    },
+                    {
+                        "City": "Fukuoka",
+                        "Population": 1538000
+                    },
+                    {
+                        "City": "Glasgow",
+                        "Population": 633120
+                    },
+                    {
+                        "City": "Goiania",
+                        "Population": 1536097
+                    },
+                    {
+                        "City": "Gold Coast",
+                        "Population": 679127
+                    },
+                    {
+                        "City": "Guangzhou",
+                        "Population": 14904400
+                    },
+                    {
+                        "City": "Hamburg",
+                        "Population": 1841000
+                    },
+                    {
+                        "City": "Hamilton",
+                        "Population": 579200
+                    },
+                    {
+                        "City": "Houston",
+                        "Population": 2328000
+                    },
+                    {
+                        "City": "Hyderabad",
+                        "Population": 6993235
+                    },
+                    {
+                        "City": "Jaipur",
+                        "Population": 3046163
+                    },
+                    {
+                        "City": "Kawasaki",
+                        "Population": 1504000
+                    },
+                    {
+                        "City": "Kitchener",
+                        "Population": 233222
+                    },
+                    {
+                        "City": "Kobe",
+                        "Population": 1525000
+                    },
+                    {
+                        "City": "Kolkata",
+                        "Population": 4496694
+                    },
+                    {
+                        "City": "Kyoto",
+                        "Population": 1475000
+                    },
+                    {
+                        "City": "Leeds",
+                        "Population": 793139
+                    },
+                    {
+                        "City": "Leipzig",
+                        "Population": 587857
+                    },
+                    {
+                        "City": "Lille",
+                        "Population": 232741
+                    },
+                    {
+                        "City": "Liverpool",
+                        "Population": 498042
+                    },
+                    {
+                        "City": "Logan City",
+                        "Population": 326615
+                    },
+                    {
+                        "City": "London",
+                        "Population": 8982000
+                    },
+                    {
+                        "City": "Los Angeles",
+                        "Population": 3980400
+                    },
+                    {
+                        "City": "Lyon",
+                        "Population": 513275
+                    },
+                    {
+                        "City": "Manaus",
+                        "Population": 2219580
+                    },
+                    {
+                        "City": "Manchester",
+                        "Population": 553230
+                    },
+                    {
+                        "City": "Marseille",
+                        "Population": 861635
+                    },
+                    {
+                        "City": "Melbourne",
+                        "Population": 5078000
+                    },
+                    {
+                        "City": "Montpellier",
+                        "Population": 277639
+                    },
+                    {
+                        "City": "Montreal",
+                        "Population": 1780000
+                    },
+                    {
+                        "City": "Mumbai",
+                        "Population": 12442373
+                    },
+                    {
+                        "City": "Munich",
+                        "Population": 1472000
+                    },
+                    {
+                        "City": "Nagoya",
+                        "Population": 2296000
+                    },
+                    {
+                        "City": "Nanjing",
+                        "Population": 8500000
+                    },
+                    {
+                        "City": "Nantes",
+                        "Population": 309346
+                    },
+                    {
+                        "City": "New York",
+                        "Population": 8419600
+                    },
+                    {
+                        "City": "Newcastle",
+                        "Population": 625098
+                    },
+                    {
+                        "City": "Nice",
+                        "Population": 342522
+                    },
+                    {
+                        "City": "Osaka",
+                        "Population": 2691000
+                    },
+                    {
+                        "City": "Ottawa",
+                        "Population": 994837
+                    },
+                    {
+                        "City": "Paris",
+                        "Population": 2148271
+                    },
+                    {
+                        "City": "Perth",
+                        "Population": 2086000
+                    },
+                    {
+                        "City": "Philadelphia",
+                        "Population": 1584064
+                    },
+                    {
+                        "City": "Phoenix",
+                        "Population": 1680992
+                    },
+                    {
+                        "City": "Pune",
+                        "Population": 3124458
+                    },
+                    {
+                        "City": "Quebec City",
+                        "Population": 542298
+                    },
+                    {
+                        "City": "Recife",
+                        "Population": 1653461
+                    },
+                    {
+                        "City": "Rio de Janeiro",
+                        "Population": 6747815
+                    },
+                    {
+                        "City": "Saitama",
+                        "Population": 1264000
+                    },
+                    {
+                        "City": "Salvador",
+                        "Population": 2886698
+                    },
+                    {
+                        "City": "San Antonio",
+                        "Population": 1547253
+                    },
+                    {
+                        "City": "San Diego",
+                        "Population": 1423851
+                    },
+                    {
+                        "City": "San Jose",
+                        "Population": 1021795
+                    },
+                    {
+                        "City": "Sao Paulo",
+                        "Population": 12325232
+                    },
+                    {
+                        "City": "Sapporo",
+                        "Population": 1952000
+                    },
+                    {
+                        "City": "Shanghai",
+                        "Population": 24256800
+                    },
+                    {
+                        "City": "Sheffield",
+                        "Population": 584853
+                    },
+                    {
+                        "City": "Shenzhen",
+                        "Population": 12528300
+                    },
+                    {
+                        "City": "Strasbourg",
+                        "Population": 280966
+                    },
+                    {
+                        "City": "Stuttgart",
+                        "Population": 634830
+                    },
+                    {
+                        "City": "Surat",
+                        "Population": 4467797
+                    },
+                    {
+                        "City": "Sydney",
+                        "Population": 5312000
+                    },
+                    {
+                        "City": "Tianjin",
+                        "Population": 15618300
+                    },
+                    {
+                        "City": "Tokyo",
+                        "Population": 13960000
+                    },
+                    {
+                        "City": "Toronto",
+                        "Population": 2930000
+                    },
+                    {
+                        "City": "Toulouse",
+                        "Population": 471941
+                    },
+                    {
+                        "City": "Vancouver",
+                        "Population": 675218
+                    },
+                    {
+                        "City": "Winnipeg",
+                        "Population": 749607
+                    },
+                    {
+                        "City": "Wollongong",
+                        "Population": 302739
+                    },
+                    {
+                        "City": "Wuhan",
+                        "Population": 11081000
+                    },
+                    {
+                        "City": "Yokohama",
+                        "Population": 3725000
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "source": "Step 1",
+                "sourceId": "1",
+                "prompt": "filter for greater than 100 population",
+                "code": "df_result = df[df['Population'] > 100]",
+                "data": [
+                    {
+                        "City": "Adelaide",
+                        "Population": 1359000
+                    },
+                    {
+                        "City": "Ahmedabad",
+                        "Population": 5577940
+                    },
+                    {
+                        "City": "Bangalore",
+                        "Population": 8443675
+                    },
+                    {
+                        "City": "Beijing",
+                        "Population": 21516000
+                    },
+                    {
+                        "City": "Belfast",
+                        "Population": 343542
+                    },
+                    {
+                        "City": "Belo Horizonte",
+                        "Population": 2521564
+                    },
+                    {
+                        "City": "Berlin",
+                        "Population": 3645000
+                    },
+                    {
+                        "City": "Birmingham",
+                        "Population": 1141816
+                    },
+                    {
+                        "City": "Bordeaux",
+                        "Population": 249712
+                    },
+                    {
+                        "City": "Brasilia",
+                        "Population": 3055149
+                    },
+                    {
+                        "City": "Brisbane",
+                        "Population": 2514000
+                    },
+                    {
+                        "City": "Bristol",
+                        "Population": 467099
+                    },
+                    {
+                        "City": "Calgary",
+                        "Population": 1336000
+                    },
+                    {
+                        "City": "Canberra",
+                        "Population": 426704
+                    },
+                    {
+                        "City": "Chengdu",
+                        "Population": 16330000
+                    },
+                    {
+                        "City": "Chennai",
+                        "Population": 4646732
+                    },
+                    {
+                        "City": "Chicago",
+                        "Population": 2716000
+                    },
+                    {
+                        "City": "Chongqing",
+                        "Population": 30484300
+                    },
+                    {
+                        "City": "Cologne",
+                        "Population": 1086000
+                    },
+                    {
+                        "City": "Curitiba",
+                        "Population": 1948626
+                    },
+                    {
+                        "City": "Dallas",
+                        "Population": 1343573
+                    },
+                    {
+                        "City": "Delhi",
+                        "Population": 11034555
+                    },
+                    {
+                        "City": "Dongguan",
+                        "Population": 8220207
+                    },
+                    {
+                        "City": "Dortmund",
+                        "Population": 587010
+                    },
+                    {
+                        "City": "Dusseldorf",
+                        "Population": 619294
+                    },
+                    {
+                        "City": "Edmonton",
+                        "Population": 1010000
+                    },
+                    {
+                        "City": "Essen",
+                        "Population": 583109
+                    },
+                    {
+                        "City": "Fortaleza",
+                        "Population": 2686612
+                    },
+                    {
+                        "City": "Frankfurt",
+                        "Population": 753056
+                    },
+                    {
+                        "City": "Fukuoka",
+                        "Population": 1538000
+                    },
+                    {
+                        "City": "Glasgow",
+                        "Population": 633120
+                    },
+                    {
+                        "City": "Goiania",
+                        "Population": 1536097
+                    },
+                    {
+                        "City": "Gold Coast",
+                        "Population": 679127
+                    },
+                    {
+                        "City": "Guangzhou",
+                        "Population": 14904400
+                    },
+                    {
+                        "City": "Hamburg",
+                        "Population": 1841000
+                    },
+                    {
+                        "City": "Hamilton",
+                        "Population": 579200
+                    },
+                    {
+                        "City": "Houston",
+                        "Population": 2328000
+                    },
+                    {
+                        "City": "Hyderabad",
+                        "Population": 6993235
+                    },
+                    {
+                        "City": "Jaipur",
+                        "Population": 3046163
+                    },
+                    {
+                        "City": "Kawasaki",
+                        "Population": 1504000
+                    },
+                    {
+                        "City": "Kitchener",
+                        "Population": 233222
+                    },
+                    {
+                        "City": "Kobe",
+                        "Population": 1525000
+                    },
+                    {
+                        "City": "Kolkata",
+                        "Population": 4496694
+                    },
+                    {
+                        "City": "Kyoto",
+                        "Population": 1475000
+                    },
+                    {
+                        "City": "Leeds",
+                        "Population": 793139
+                    },
+                    {
+                        "City": "Leipzig",
+                        "Population": 587857
+                    },
+                    {
+                        "City": "Lille",
+                        "Population": 232741
+                    },
+                    {
+                        "City": "Liverpool",
+                        "Population": 498042
+                    },
+                    {
+                        "City": "Logan City",
+                        "Population": 326615
+                    },
+                    {
+                        "City": "London",
+                        "Population": 8982000
+                    },
+                    {
+                        "City": "Los Angeles",
+                        "Population": 3980400
+                    },
+                    {
+                        "City": "Lyon",
+                        "Population": 513275
+                    },
+                    {
+                        "City": "Manaus",
+                        "Population": 2219580
+                    },
+                    {
+                        "City": "Manchester",
+                        "Population": 553230
+                    },
+                    {
+                        "City": "Marseille",
+                        "Population": 861635
+                    },
+                    {
+                        "City": "Melbourne",
+                        "Population": 5078000
+                    },
+                    {
+                        "City": "Montpellier",
+                        "Population": 277639
+                    },
+                    {
+                        "City": "Montreal",
+                        "Population": 1780000
+                    },
+                    {
+                        "City": "Mumbai",
+                        "Population": 12442373
+                    },
+                    {
+                        "City": "Munich",
+                        "Population": 1472000
+                    },
+                    {
+                        "City": "Nagoya",
+                        "Population": 2296000
+                    },
+                    {
+                        "City": "Nanjing",
+                        "Population": 8500000
+                    },
+                    {
+                        "City": "Nantes",
+                        "Population": 309346
+                    },
+                    {
+                        "City": "New York",
+                        "Population": 8419600
+                    },
+                    {
+                        "City": "Newcastle",
+                        "Population": 625098
+                    },
+                    {
+                        "City": "Nice",
+                        "Population": 342522
+                    },
+                    {
+                        "City": "Osaka",
+                        "Population": 2691000
+                    },
+                    {
+                        "City": "Ottawa",
+                        "Population": 994837
+                    },
+                    {
+                        "City": "Paris",
+                        "Population": 2148271
+                    },
+                    {
+                        "City": "Perth",
+                        "Population": 2086000
+                    },
+                    {
+                        "City": "Philadelphia",
+                        "Population": 1584064
+                    },
+                    {
+                        "City": "Phoenix",
+                        "Population": 1680992
+                    },
+                    {
+                        "City": "Pune",
+                        "Population": 3124458
+                    },
+                    {
+                        "City": "Quebec City",
+                        "Population": 542298
+                    },
+                    {
+                        "City": "Recife",
+                        "Population": 1653461
+                    },
+                    {
+                        "City": "Rio de Janeiro",
+                        "Population": 6747815
+                    },
+                    {
+                        "City": "Saitama",
+                        "Population": 1264000
+                    },
+                    {
+                        "City": "Salvador",
+                        "Population": 2886698
+                    },
+                    {
+                        "City": "San Antonio",
+                        "Population": 1547253
+                    },
+                    {
+                        "City": "San Diego",
+                        "Population": 1423851
+                    },
+                    {
+                        "City": "San Jose",
+                        "Population": 1021795
+                    },
+                    {
+                        "City": "Sao Paulo",
+                        "Population": 12325232
+                    },
+                    {
+                        "City": "Sapporo",
+                        "Population": 1952000
+                    },
+                    {
+                        "City": "Shanghai",
+                        "Population": 24256800
+                    },
+                    {
+                        "City": "Sheffield",
+                        "Population": 584853
+                    },
+                    {
+                        "City": "Shenzhen",
+                        "Population": 12528300
+                    },
+                    {
+                        "City": "Strasbourg",
+                        "Population": 280966
+                    },
+                    {
+                        "City": "Stuttgart",
+                        "Population": 634830
+                    },
+                    {
+                        "City": "Surat",
+                        "Population": 4467797
+                    },
+                    {
+                        "City": "Sydney",
+                        "Population": 5312000
+                    },
+                    {
+                        "City": "Tianjin",
+                        "Population": 15618300
+                    },
+                    {
+                        "City": "Tokyo",
+                        "Population": 13960000
+                    },
+                    {
+                        "City": "Toronto",
+                        "Population": 2930000
+                    },
+                    {
+                        "City": "Toulouse",
+                        "Population": 471941
+                    },
+                    {
+                        "City": "Vancouver",
+                        "Population": 675218
+                    },
+                    {
+                        "City": "Winnipeg",
+                        "Population": 749607
+                    },
+                    {
+                        "City": "Wollongong",
+                        "Population": 302739
+                    },
+                    {
+                        "City": "Wuhan",
+                        "Population": 11081000
+                    },
+                    {
+                        "City": "Yokohama",
+                        "Population": 3725000
+                    }
+                ]
+            }
+        ],
+        "timestamp": "2025-12-30T15:46:36.154231"
+    },
+    {
+        "id": "c08f0e09",
+        "name": "Recons bank vs GL",
+        "steps": [
+            {
+                "id": "step-1",
+                "numericId": 1,
+                "inputIds": [
+                    "dataset-1",
+                    "dataset-3"
+                ],
+                "prompt": "\"Perform an outer join on the two dataframes using 'TransactionID' and 'Date' as the key. ",
+                "code": "import pandas as pd\n\ndf_result = pd.merge(\n    df_Reconflow_sample_data___Sheet3_csv, \n    df_Reconflow_sample_data___Sheet4__2__csv, \n    on=['TransactionID', 'Date'], \n    how='outer'\n)",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1001",
+                        "Date": "2023-10-01",
+                        "Description": "Opening Balance",
+                        "Amount_x": "5000",
+                        "Memo": "Opening Balance",
+                        "Amount_y": "5000"
+                    },
+                    {
+                        "TransactionID": "BNK-1002",
+                        "Date": "2023-10-03",
+                        "Description": "Client Payment - Alpha",
+                        "Amount_x": "1200",
+                        "Memo": "Inv #1001 Payment",
+                        "Amount_y": "1200"
+                    },
+                    {
+                        "TransactionID": "BNK-1003",
+                        "Date": "2023-10-05",
+                        "Description": "Vendor Payment - AWS",
+                        "Amount_x": "-350",
+                        "Memo": "AWS Hosting",
+                        "Amount_y": "-350"
+                    },
+                    {
+                        "TransactionID": "BNK-1004",
+                        "Date": "2023-10-15",
+                        "Description": "Client Payment - Beta",
+                        "Amount_x": "800",
+                        "Memo": "Inv #1002 Payment",
+                        "Amount_y": "800"
+                    },
+                    {
+                        "TransactionID": "BNK-1005",
+                        "Date": "2023-10-20",
+                        "Description": "Office Supplies",
+                        "Amount_x": "-120",
+                        "Memo": "Staples Order",
+                        "Amount_y": "-120"
+                    },
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "Description": "NaN",
+                        "Amount_x": "NaN",
+                        "Memo": "Consultant Payment (Check)",
+                        "Amount_y": "-200"
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "Description": "Monthly Bank Service Fee",
+                        "Amount_x": "-50",
+                        "Memo": "NaN",
+                        "Amount_y": "NaN"
+                    }
+                ]
+            },
+            {
+                "id": "step-2",
+                "numericId": 2,
+                "inputIds": [
+                    "step-1"
+                ],
+                "prompt": "Subtract the two amount columns to create a value column. \nIn case if one of the values is not a number, replace it with zero",
+                "code": "import pandas as pd\n\ndf_result = df_step_1.copy()\n\n# Convert Amount columns to numeric, forcing non-numeric values (strings, dates, etc) to NaN\n# Then fill those NaN values with 0 before subtracting\ndf_result['value'] = (\n    pd.to_numeric(df_result['Amount_x'], errors='coerce').fillna(0) - \n    pd.to_numeric(df_result['Amount_y'], errors='coerce').fillna(0)\n)",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1001",
+                        "Date": "2023-10-01",
+                        "Description": "Opening Balance",
+                        "Amount_x": "5000",
+                        "Memo": "Opening Balance",
+                        "Amount_y": "5000",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1002",
+                        "Date": "2023-10-03",
+                        "Description": "Client Payment - Alpha",
+                        "Amount_x": "1200",
+                        "Memo": "Inv #1001 Payment",
+                        "Amount_y": "1200",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1003",
+                        "Date": "2023-10-05",
+                        "Description": "Vendor Payment - AWS",
+                        "Amount_x": "-350",
+                        "Memo": "AWS Hosting",
+                        "Amount_y": "-350",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1004",
+                        "Date": "2023-10-15",
+                        "Description": "Client Payment - Beta",
+                        "Amount_x": "800",
+                        "Memo": "Inv #1002 Payment",
+                        "Amount_y": "800",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1005",
+                        "Date": "2023-10-20",
+                        "Description": "Office Supplies",
+                        "Amount_x": "-120",
+                        "Memo": "Staples Order",
+                        "Amount_y": "-120",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "Description": "NaN",
+                        "Amount_x": "NaN",
+                        "Memo": "Consultant Payment (Check)",
+                        "Amount_y": "-200",
+                        "value": 200
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "Description": "Monthly Bank Service Fee",
+                        "Amount_x": "-50",
+                        "Memo": "NaN",
+                        "Amount_y": "NaN",
+                        "value": -50
+                    }
+                ]
+            },
+            {
+                "id": "step-3",
+                "numericId": 3,
+                "inputIds": [
+                    "step-2"
+                ],
+                "prompt": "Filter the dataset and only keep the rows in value not equal to 0",
+                "code": "df_result = df_step_2[df_step_2['value'] != 0]",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "Description": "NaN",
+                        "Amount_x": "NaN",
+                        "Memo": "Consultant Payment (Check)",
+                        "Amount_y": "-200",
+                        "value": 200
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "Description": "Monthly Bank Service Fee",
+                        "Amount_x": "-50",
+                        "Memo": "NaN",
+                        "Amount_y": "NaN",
+                        "value": -50
+                    }
+                ]
+            },
+            {
+                "id": "step-4",
+                "numericId": 4,
+                "inputIds": [
+                    "step-3"
+                ],
+                "prompt": "\"Create a new column called 'Reason'. If value is positive, set Reason to 'Uncleared Check', Else, set Reason to 'Unrecorded Bank Item'. Return just the Transacton Id, Date, absolute Value, and Reason.\"",
+                "code": "df_result = df_step_3.copy()\ndf_result['Reason'] = df_result['value'].apply(lambda x: 'Uncleared Check' if x > 0 else 'Unrecorded Bank Item')\ndf_result['value'] = df_result['value'].abs()\ndf_result = df_result[['TransactionID', 'Date', 'value', 'Reason']]",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "value": 200,
+                        "Reason": "Uncleared Check"
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "value": 50,
+                        "Reason": "Unrecorded Bank Item"
+                    }
+                ]
+            }
+        ],
+        "timestamp": "2025-12-31T15:07:04.170896"
+    },
+    {
+        "id": "0909b43f",
+        "name": "Recons 2",
+        "steps": [
+            {
+                "id": "step-1",
+                "numericId": 1,
+                "inputIds": [
+                    "dataset-1",
+                    "dataset-2"
+                ],
+                "prompt": "\"Perform an outer join on the two dataframes using 'TransactionID' and 'Date' as the key. \n",
+                "code": "import pandas as pd\n\ndf_result = pd.merge(\n    df_Reconflow_sample_data___Sheet3_csv, \n    df_Reconflow_sample_data___Sheet4__2__csv, \n    on=['TransactionID', 'Date'], \n    how='outer'\n)",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1001",
+                        "Date": "2023-10-01",
+                        "Description": "Opening Balance",
+                        "Amount_x": "5000",
+                        "Memo": "Opening Balance",
+                        "Amount_y": "5000"
+                    },
+                    {
+                        "TransactionID": "BNK-1002",
+                        "Date": "2023-10-03",
+                        "Description": "Client Payment - Alpha",
+                        "Amount_x": "1200",
+                        "Memo": "Inv #1001 Payment",
+                        "Amount_y": "1200"
+                    },
+                    {
+                        "TransactionID": "BNK-1003",
+                        "Date": "2023-10-05",
+                        "Description": "Vendor Payment - AWS",
+                        "Amount_x": "-350",
+                        "Memo": "AWS Hosting",
+                        "Amount_y": "-350"
+                    },
+                    {
+                        "TransactionID": "BNK-1004",
+                        "Date": "2023-10-15",
+                        "Description": "Client Payment - Beta",
+                        "Amount_x": "800",
+                        "Memo": "Inv #1002 Payment",
+                        "Amount_y": "800"
+                    },
+                    {
+                        "TransactionID": "BNK-1005",
+                        "Date": "2023-10-20",
+                        "Description": "Office Supplies",
+                        "Amount_x": "-120",
+                        "Memo": "Staples Order",
+                        "Amount_y": "-120"
+                    },
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "Description": "NaN",
+                        "Amount_x": "NaN",
+                        "Memo": "Consultant Payment (Check)",
+                        "Amount_y": "-200"
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "Description": "Monthly Bank Service Fee",
+                        "Amount_x": "-50",
+                        "Memo": "NaN",
+                        "Amount_y": "NaN"
+                    }
+                ]
+            },
+            {
+                "id": "step-2",
+                "numericId": 2,
+                "inputIds": [
+                    "step-1"
+                ],
+                "prompt": "Subtract the two amount columns to create a value column. In case if one of the values is not a number, replace it with zero\n",
+                "code": "import pandas as pd\n\ndf_result = df_step_1.copy()\n\n# Convert Amount columns to numeric, coercing errors to NaN, then filling with 0\n# This satisfies the condition: \"In case if one of the values is not a number, replace it with zero\"\namount_x = pd.to_numeric(df_result['Amount_x'], errors='coerce').fillna(0)\namount_y = pd.to_numeric(df_result['Amount_y'], errors='coerce').fillna(0)\n\n# Subtract the columns to create 'value'\ndf_result['value'] = amount_x - amount_y",
+                "data": [
+                    {
+                        "TransactionID": "BNK-1001",
+                        "Date": "2023-10-01",
+                        "Description": "Opening Balance",
+                        "Amount_x": "5000",
+                        "Memo": "Opening Balance",
+                        "Amount_y": "5000",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1002",
+                        "Date": "2023-10-03",
+                        "Description": "Client Payment - Alpha",
+                        "Amount_x": "1200",
+                        "Memo": "Inv #1001 Payment",
+                        "Amount_y": "1200",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1003",
+                        "Date": "2023-10-05",
+                        "Description": "Vendor Payment - AWS",
+                        "Amount_x": "-350",
+                        "Memo": "AWS Hosting",
+                        "Amount_y": "-350",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1004",
+                        "Date": "2023-10-15",
+                        "Description": "Client Payment - Beta",
+                        "Amount_x": "800",
+                        "Memo": "Inv #1002 Payment",
+                        "Amount_y": "800",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1005",
+                        "Date": "2023-10-20",
+                        "Description": "Office Supplies",
+                        "Amount_x": "-120",
+                        "Memo": "Staples Order",
+                        "Amount_y": "-120",
+                        "value": 0
+                    },
+                    {
+                        "TransactionID": "BNK-1006",
+                        "Date": "2023-10-28",
+                        "Description": "NaN",
+                        "Amount_x": "NaN",
+                        "Memo": "Consultant Payment (Check)",
+                        "Amount_y": "-200",
+                        "value": 200
+                    },
+                    {
+                        "TransactionID": "BNK-9999",
+                        "Date": "2023-10-31",
+                        "Description": "Monthly Bank Service Fee",
+                        "Amount_x": "-50",
+                        "Memo": "NaN",
+                        "Amount_y": "NaN",
+                        "value": -50
+                    }
+                ]
+            }
+        ],
+        "timestamp": "2025-12-31T15:15:04.684457"
+    }
+]

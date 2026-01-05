@@ -1,0 +1,124 @@
+/* DataContext.css */
+
+/* --- FIX 1: HIGH CONTRAST TEXT --- */
+.context-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #ffffff;
+  
+  /* FORCE DARK TEXT COLOR */
+  color: #111827 !important; /* Almost black */
+}
+
+/* Ensure placeholder is visible but distinct */
+.context-input::placeholder {
+  color: #6b7280; /* Medium gray */
+  opacity: 1;
+}
+
+.context-input:focus {
+  outline: none;
+  border-color: #3b82f6; /* Blue border on focus */
+}
+
+/* --- LAYOUT STYLES --- */
+.container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background: white;
+  width: 100%;
+  max-width: 600px;
+}
+
+.header {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.btn-load {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-load:hover {
+  background-color: #1d4ed8;
+}
+
+/* --- FILE LIST --- */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+}
+
+/* Hover state for rows */
+.file-row:hover {
+  background-color: #f3f4f6;
+}
+
+/* Active Selection State */
+.file-row.selected {
+  background-color: #eff6ff; /* Light Blue bg */
+  border-color: #bfdbfe;     /* Blue border */
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  /* FORCE DARK TEXT COLOR FOR LIST ITEMS */
+  color: #111827; 
+  font-weight: 500;
+}
+
+.file-icon {
+  color: #9ca3af;
+}
+
+/* The distinct View Button */
+.btn-view {
+  background-color: #1f2937; /* Dark button like screenshot */
+  color: white;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  opacity: 0; /* Hidden by default until hover or selection */
+  transition: opacity 0.2s;
+}
+
+.file-row:hover .btn-view,
+.file-row.selected .btn-view {
+  opacity: 1; /* Show on hover or when selected */
+}
