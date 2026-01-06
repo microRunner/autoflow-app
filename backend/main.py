@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+import re  
 
 # --- SQLALCHEMY ---
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, Integer, Text, inspect, text
@@ -279,12 +280,22 @@ def run_python_logic(datasets_map: Dict[str, pd.DataFrame], prompt: str = None, 
 # --- NEW: UPLOAD ENDPOINT ---
 @app.post("/upload")
 async def upload_csv(file: UploadFile = File(...)):
-    """Accepts a CSV file, reads it, and returns the data."""
+    """Accepts a CSV, saves it to SQL DB, and returns data."""
     try:
         content = await file.read()
         df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-        df = df.fillna("NaN") # Handle NaNs for JSON
+        df = df.fillna("NaN")
+
+        # 1. Sanitize filename to match Frontend logic (data.csv -> data_csv)
+        # This ensures the variable name 'df_data_csv' matches what the AI expects
+        safe_table_name = re.sub(r'[^a-zA-Z0-9]', '_', file.filename)
+
+        # 2. SAVE TO DATABASE (Persistent Storage)
+        df.to_sql(safe_table_name, data_engine, if_exists="replace", index=False)
+        print(f"✅ CSV Saved to DB as table: '{safe_table_name}'")
+
         return {"filename": file.filename, "data": df.to_dict(orient="records")}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process CSV: {str(e)}")
 
