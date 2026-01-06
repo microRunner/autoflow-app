@@ -5,7 +5,7 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css'; 
 import './App.css'; 
 
-//const API_BASE_URL = "/api";
+// const API_BASE_URL = "/api";
 const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
 
 
@@ -197,25 +197,70 @@ function App() {
       } catch (e) {} 
   };
 
+  // --- AUTO-LOAD DATASETS FOR SAVED WORKFLOWS ---
+  // NEW FIX: If you open a workflow that relies on 'vat_prev', load it automatically.
+  useEffect(() => {
+      if (selectedWorkflowId && savedWorkflows.length > 0) {
+          const wf = savedWorkflows.find(w => w.id === selectedWorkflowId);
+          if (!wf) return;
+
+          const requiredInputs = new Set();
+          wf.steps.forEach(step => {
+              step.inputIds.forEach(id => {
+                  if (!id.startsWith('step-')) requiredInputs.add(id);
+              });
+          });
+
+          requiredInputs.forEach(tableId => {
+              const isLoaded = baseDatasets.find(ds => ds.id === tableId);
+              if (!isLoaded && availableTables.includes(tableId)) {
+                  console.log(`Auto-loading missing dependency: ${tableId}`);
+                  axios.post(`${API_BASE_URL}/db/load`, { table_name: tableId })
+                      .then(res => {
+                          setBaseDatasets(prev => {
+                              if (prev.find(d => d.id === tableId)) return prev;
+                              return [...prev, {
+                                  id: tableId,
+                                  name: tableId,
+                                  varName: `df_${tableId.replace(/[^a-zA-Z0-9]/g, '_')}`,
+                                  data: res.data.data,
+                                  type: 'source'
+                              }];
+                          });
+                      })
+                      .catch(err => console.error("Failed to auto-load", tableId));
+              }
+          });
+      }
+  }, [selectedWorkflowId, savedWorkflows, availableTables, baseDatasets]);
+
+  // --- HANDLE LOAD TABLE (FIXED) ---
   const handleLoadTable = async () => {
     if(!selectedTable) return;
     setLoading(true);
     try {
         const res = await axios.post(`${API_BASE_URL}/db/load`, { table_name: selectedTable });
+        
+        // FIX: Use stable ID (the table name) instead of random timestamp
         const newDataset = { 
-            id: `dataset-${Date.now()}`, 
+            id: selectedTable, 
             name: selectedTable, 
             varName: `df_${selectedTable.replace(/[^a-zA-Z0-9]/g, '_')}`, 
             data: res.data.data,
             type: 'source' 
         };
-        setBaseDatasets(prev => [...prev, newDataset]);
+        
+        setBaseDatasets(prev => {
+            if (prev.find(d => d.id === newDataset.id)) return prev;
+            return [...prev, newDataset];
+        });
+        
         setSelectedTable(""); 
         console.log("Loaded:", newDataset.name);
     } catch (e) { alert("Failed load: " + e.message); } finally { setLoading(false); }
   };
   
-  // --- HANDLE CSV UPLOAD ---
+  // --- HANDLE CSV UPLOAD (FIXED) ---
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -229,21 +274,26 @@ function App() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
+      // FIX: Use stable ID (the filename) instead of random timestamp
       const newDataset = { 
-        id: `dataset-${Date.now()}`, 
+        id: file.name, 
         name: file.name, 
         varName: `df_${file.name.replace(/[^a-zA-Z0-9]/g, '_')}`, 
         data: res.data.data,
         type: 'source' 
       };
 
-      setBaseDatasets(prev => [...prev, newDataset]);
+      setBaseDatasets(prev => {
+          if (prev.find(d => d.id === newDataset.id)) return prev;
+          return [...prev, newDataset];
+      });
+
       console.log("Uploaded:", newDataset.name);
     } catch (err) {
       alert("Upload failed: " + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
-      e.target.value = null; // Reset input
+      e.target.value = null; 
     }
   };
 
@@ -284,7 +334,6 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
-  // --- DELETE STAGE HANDLER ---
   const handleDeleteStep = (stepId) => {
     if (!window.confirm("Delete this stage? Any downstream stages relying on this will break.")) return;
     setSteps(prev => prev.filter(s => s.id !== stepId));
@@ -310,7 +359,6 @@ function App() {
         const taskType = mode === "AGENT" ? "RECON" : "GENERAL";
         const promptPrefix = mode === "AGENT" ? "🤖 Agent Task: " : "";
         
-        // ADDED TIMEOUT: 5 Minutes (300000ms)
         const response = await axios.post(`${API_BASE_URL}/process_multi`, 
             { datasets: payloadDatasets, prompt: prompt, task_type: taskType },
             { timeout: 300000 }
@@ -351,7 +399,6 @@ function App() {
                  step.inputIds.forEach(id => { const base = baseDatasets.find(d => d.id === id); if (base) payloadDatasets[base.varName] = base.data; });
             }
             
-            // ADDED TIMEOUT: 5 Minutes (300000ms)
             const response = await axios.post(`${API_BASE_URL}/execute_multi`, 
                 { datasets: payloadDatasets, code: step.code },
                 { timeout: 300000 }
@@ -378,30 +425,23 @@ function App() {
   };
   const handleStopSchedule = async (scheduleId) => { if (!window.confirm("Stop schedule?")) return; try { await axios.delete(`${API_BASE_URL}/schedules/${scheduleId}`); alert("Stopped."); fetchWorkflows(); } catch(e) { alert("Failed: " + e.message); } };
   const handleEditSchedule = (id) => { setSelectedWorkflowId(id); setShowScheduler(true); };
-const saveWorkflow = async () => { 
+
+  // --- SAVE WORKFLOW (Lightweight Fix Preserved) ---
+  const saveWorkflow = async () => { 
       const name = window.prompt("Name:", `Process ${new Date().toLocaleDateString()}`); 
       if (!name) return; 
-
-      // --- CRITICAL FIX: LIGHTWEIGHT SAVE ---
-      // We create a clean copy of the steps that includes ONLY the logic (prompt, code, IDs).
-      // We deliberately EMPTY the 'data' array.
-      // This reduces the upload size from ~5MB to ~2KB, ensuring it saves instantly.
-      const lightweightSteps = steps.map(step => ({
-          ...step,
-          data: [] // Force data to be empty for the database
-      }));
-
+      // STRIP DATA for fast saving
+      const lightweightSteps = steps.map(step => ({ ...step, data: [] }));
       try { 
-          // Send the lightweight version to the backend
           await axios.post(`${API_BASE_URL}/workflows`, { name, steps: lightweightSteps }); 
           alert("Saved successfully!"); 
-          fetchWorkflows(); // Refresh the list
+          fetchWorkflows(); 
       } catch (e) { 
-          // Better error handling to show YOU if it fails
           console.error(e);
           alert("Save Failed: " + (e.response?.data?.detail || e.message)); 
       } 
   };
+
   const handleEdit = (step) => { setEditingStepId(step.id); if (step.prompt.startsWith("🤖")) { setMode("AGENT"); setPrompt(step.prompt.replace(/🤖.*?: /, "")); } else { setMode("AI"); setPrompt(step.prompt); } setSelectedInputIds(step.inputIds || []); document.getElementById("control-panel").scrollIntoView({ behavior: 'smooth' }); };
   const handleCancelEdit = () => { setEditingStepId(null); setPrompt(""); setSelectedInputIds([]); };
   const toggleSelection = (id) => { setSelectedInputIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]); };
