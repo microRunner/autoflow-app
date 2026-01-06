@@ -5,8 +5,8 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css'; 
 import './App.css'; 
 
-// const API_BASE_URL = "/api";
-const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
+const API_BASE_URL = "/api";
+// const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
 
 
 // --- HELPERS ---

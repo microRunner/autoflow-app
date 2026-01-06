@@ -81,10 +81,12 @@ def get_db():
 
 # --- SEEDING DUMMY DATA ---
 def seed_dummy_data():
-    """Forces a refresh of the warehouse data to fix schema mismatches."""
+    """Checks for source CSVs/Tables and seeds the warehouse."""
     print("🌱 Checking Data Warehouse...")
     try:
         with data_engine.connect() as conn:
+            # 1. Seed GL & Bank Data (Existing Logic)
+            # -------------------------------------------------
             conn.execute(text("DROP TABLE IF EXISTS gl_transactions"))
             conn.execute(text("DROP TABLE IF EXISTS bank_statement"))
             
@@ -103,7 +105,39 @@ def seed_dummy_data():
                 "bank_ref": ["REF-A", "REF-B", "REF-C", "REF-D", "REF-E"] * 3 + ["REF-F", "REF-G"]
             })
             df_bank.to_sql("bank_statement", data_engine, index=False)
+            
+            # 2. Seed VAT Data (New Logic from CSVs)
+            # -------------------------------------------------
+            csv_files = {
+                "vat_prev": "vat_prev.csv",
+                "vat_curr": "vat_curr.csv"
+            }
+            
+            for table_name, filename in csv_files.items():
+                if os.path.exists(filename):
+                    print(f"   - Loading {filename} into {table_name}...")
+                    
+                    # Read CSV
+                    df = pd.read_csv(filename)
+                    
+                    # CLEANING: 
+                    # 1. Standardize headers (lower case, underscores)
+                    df.columns = df.columns.str.lower().str.replace(' ', '_').str.replace('.', '').str.replace('/', '_')
+                    
+                    # 2. Fix Amount format (remove commas "1,000.00" -> 1000.00)
+                    # We look for columns that might contain 'amount'
+                    for col in df.columns:
+                        if 'amount' in col and df[col].dtype == 'object':
+                            df[col] = df[col].astype(str).str.replace(',', '').astype(float)
+                            
+                    # Save to DB
+                    conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+                    df.to_sql(table_name, data_engine, index=False)
+                else:
+                    print(f"⚠️ Warning: {filename} not found. Skipping.")
+
             print("✅ Data Warehouse Seeded.")
+            
     except Exception as e:
         print(f"⚠️ Seeding skipped or failed: {e}")
 
