@@ -112,7 +112,15 @@ seed_dummy_data()
 # 2. SCHEDULER SETUP
 # ==========================================
 jobstores = { 'default': SQLAlchemyJobStore(url=WORKFLOW_DB_URL) }
-scheduler = BackgroundScheduler(jobstores=jobstores)
+
+# THIS IS THE FIX:
+job_defaults = {
+    'coalesce': True,             # If 10 runs were missed, just run ONCE to catch up
+    'max_instances': 1,           # Prevent duplicate runs
+    'misfire_grace_time': 3600    # Allow the job to be up to 1 HOUR late and still run
+}
+
+scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults)
 scheduler.start()
 
 # ==========================================

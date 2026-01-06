@@ -5,9 +5,9 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css'; 
 import './App.css'; 
 
-// IMPORTANT: Point this to your Cloud Run URL
 // const API_BASE_URL = "/api";
 const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
+
 
 // --- HELPERS ---
 const nodeWidth = 250;
@@ -215,7 +215,7 @@ function App() {
     } catch (e) { alert("Failed load: " + e.message); } finally { setLoading(false); }
   };
   
-  // --- NEW: HANDLE CSV UPLOAD ---
+  // --- HANDLE CSV UPLOAD ---
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -284,6 +284,17 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
+  // --- DELETE STAGE HANDLER ---
+  const handleDeleteStep = (stepId) => {
+    if (!window.confirm("Delete this stage? Any downstream stages relying on this will break.")) return;
+    setSteps(prev => prev.filter(s => s.id !== stepId));
+    if (editingStepId === stepId) {
+        setEditingStepId(null);
+        setPrompt("");
+        setSelectedInputIds([]);
+    }
+  };
+
   const handleProcess = async () => {
     if (selectedInputIds.length === 0) return alert("Select inputs.");
     if (!prompt) return alert("Enter instructions.");
@@ -298,7 +309,13 @@ function App() {
         });
         const taskType = mode === "AGENT" ? "RECON" : "GENERAL";
         const promptPrefix = mode === "AGENT" ? "🤖 Agent Task: " : "";
-        const response = await axios.post(`${API_BASE_URL}/process_multi`, { datasets: payloadDatasets, prompt: prompt, task_type: taskType });
+        
+        // ADDED TIMEOUT: 5 Minutes (300000ms)
+        const response = await axios.post(`${API_BASE_URL}/process_multi`, 
+            { datasets: payloadDatasets, prompt: prompt, task_type: taskType },
+            { timeout: 300000 }
+        );
+        
         const resultStep = {
             id: editingStepId || `step-${steps.length + 1}`,
             numericId: editingStepId ? steps.find(s => s.id === editingStepId).numericId : steps.length + 1,
@@ -333,7 +350,13 @@ function App() {
             if (Object.keys(payloadDatasets).length === 0) {
                  step.inputIds.forEach(id => { const base = baseDatasets.find(d => d.id === id); if (base) payloadDatasets[base.varName] = base.data; });
             }
-            const response = await axios.post(`${API_BASE_URL}/execute_multi`, { datasets: payloadDatasets, code: step.code });
+            
+            // ADDED TIMEOUT: 5 Minutes (300000ms)
+            const response = await axios.post(`${API_BASE_URL}/execute_multi`, 
+                { datasets: payloadDatasets, code: step.code },
+                { timeout: 300000 }
+            );
+
             const resultData = response.data.result;
             tempSteps = tempSteps.map(s => s.id === step.id ? { ...s, data: resultData } : s);
             setSteps(tempSteps);
@@ -439,7 +462,7 @@ function App() {
                         </select>
                         <button onClick={handleLoadTable} disabled={loading || !selectedTable} className="btn btn-primary btn-sm" style={{width:'auto'}}>Load DB</button>
                         
-                        {/* NEW: Upload Button */}
+                        {/* Upload Button */}
                         <div style={{position: 'relative', overflow: 'hidden', display: 'inline-block'}}>
                             <button className="btn btn-secondary btn-sm" style={{height: '100%'}}>📂 Upload CSV</button>
                             <input 
@@ -505,7 +528,17 @@ function App() {
 
                 {steps.map((step) => (
                     <div key={step.id} className="step-card">
-                        <div className="step-header"><span>STAGE {step.numericId}</span>{!historicalRunId && <div><button onClick={() => downloadCSV(step)} className="btn btn-outline btn-sm" style={{marginRight:'5px'}}>Export</button><button onClick={() => handleEdit(step)} className="btn btn-outline btn-sm">Config</button></div>}</div>
+                        <div className="step-header">
+                            <span>STAGE {step.numericId}</span>
+                            {!historicalRunId && (
+                                <div>
+                                    <button onClick={() => downloadCSV(step)} className="btn btn-outline btn-sm" style={{marginRight:'5px'}}>Export</button>
+                                    <button onClick={() => handleEdit(step)} className="btn btn-outline btn-sm" style={{marginRight:'5px'}}>Config</button>
+                                    {/* DELETE BUTTON */}
+                                    <button onClick={() => handleDeleteStep(step.id)} className="btn btn-danger btn-sm" title="Delete Stage">×</button>
+                                </div>
+                            )}
+                        </div>
                         <div className="step-content">
                             <div className="logic-text">{step.prompt}</div>
                             <details className="code-widget"><summary>View Execution Logic</summary><pre className="code-block">{step.code || "# No code generated"}</pre></details>
