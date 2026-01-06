@@ -5,8 +5,8 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css'; 
 import './App.css'; 
 
-const API_BASE_URL = "/api";
-// const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
+//const API_BASE_URL = "/api";
+const API_BASE_URL = "https://autoflow-backend-330693313374.us-central1.run.app";
 
 
 // --- HELPERS ---
@@ -378,7 +378,27 @@ function App() {
   };
   const handleStopSchedule = async (scheduleId) => { if (!window.confirm("Stop schedule?")) return; try { await axios.delete(`${API_BASE_URL}/schedules/${scheduleId}`); alert("Stopped."); fetchWorkflows(); } catch(e) { alert("Failed: " + e.message); } };
   const handleEditSchedule = (id) => { setSelectedWorkflowId(id); setShowScheduler(true); };
-  const saveWorkflow = async () => { const name = window.prompt("Name:", `Process ${new Date().toLocaleDateString()}`); if (!name) return; try { await axios.post(`${API_BASE_URL}/workflows`, { name, steps }); alert("Saved!"); fetchWorkflows(); } catch (e) { alert("Fail"); } };
+  const saveWorkflow = async () => { 
+      const name = window.prompt("Name:", `Process ${new Date().toLocaleDateString()}`); 
+      if (!name) return; 
+
+      // --- NEW: LIGHTWEIGHT SAVE ---
+      // We create a copy of the steps WITHOUT the heavy 'data' arrays.
+      // This ensures the save request is tiny (KB) instead of huge (MB),
+      // preventing timeouts and crashes with CSV data.
+      const lightweightSteps = steps.map(step => ({
+          ...step,
+          data: [] // Empty the data bucket before saving
+      }));
+
+      try { 
+          await axios.post(`${API_BASE_URL}/workflows`, { name, steps: lightweightSteps }); 
+          alert("Saved!"); 
+          fetchWorkflows(); 
+      } catch (e) { 
+          alert("Save Failed: " + (e.response?.data?.detail || e.message)); 
+      } 
+  };
   const handleEdit = (step) => { setEditingStepId(step.id); if (step.prompt.startsWith("🤖")) { setMode("AGENT"); setPrompt(step.prompt.replace(/🤖.*?: /, "")); } else { setMode("AI"); setPrompt(step.prompt); } setSelectedInputIds(step.inputIds || []); document.getElementById("control-panel").scrollIntoView({ behavior: 'smooth' }); };
   const handleCancelEdit = () => { setEditingStepId(null); setPrompt(""); setSelectedInputIds([]); };
   const toggleSelection = (id) => { setSelectedInputIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]); };
