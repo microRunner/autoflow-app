@@ -378,24 +378,27 @@ function App() {
   };
   const handleStopSchedule = async (scheduleId) => { if (!window.confirm("Stop schedule?")) return; try { await axios.delete(`${API_BASE_URL}/schedules/${scheduleId}`); alert("Stopped."); fetchWorkflows(); } catch(e) { alert("Failed: " + e.message); } };
   const handleEditSchedule = (id) => { setSelectedWorkflowId(id); setShowScheduler(true); };
-  const saveWorkflow = async () => { 
+const saveWorkflow = async () => { 
       const name = window.prompt("Name:", `Process ${new Date().toLocaleDateString()}`); 
       if (!name) return; 
 
-      // --- NEW: LIGHTWEIGHT SAVE ---
-      // We create a copy of the steps WITHOUT the heavy 'data' arrays.
-      // This ensures the save request is tiny (KB) instead of huge (MB),
-      // preventing timeouts and crashes with CSV data.
+      // --- CRITICAL FIX: LIGHTWEIGHT SAVE ---
+      // We create a clean copy of the steps that includes ONLY the logic (prompt, code, IDs).
+      // We deliberately EMPTY the 'data' array.
+      // This reduces the upload size from ~5MB to ~2KB, ensuring it saves instantly.
       const lightweightSteps = steps.map(step => ({
           ...step,
-          data: [] // Empty the data bucket before saving
+          data: [] // Force data to be empty for the database
       }));
 
       try { 
+          // Send the lightweight version to the backend
           await axios.post(`${API_BASE_URL}/workflows`, { name, steps: lightweightSteps }); 
-          alert("Saved!"); 
-          fetchWorkflows(); 
+          alert("Saved successfully!"); 
+          fetchWorkflows(); // Refresh the list
       } catch (e) { 
+          // Better error handling to show YOU if it fails
+          console.error(e);
           alert("Save Failed: " + (e.response?.data?.detail || e.message)); 
       } 
   };
